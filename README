@@ -1,0 +1,14 @@
+Autor: Mateusz Gawino 320637
+
+Opis rozwiązania:
+
+Rozwiązanie jest asynchroniczne, ale nie używa bloku DMA.
+Każde urządzenie ma własny mutex, kolejke oraz aktualny kontekst wykonania.
+Operacja write polega na:
+    1. Zabraniu mutexa na danym urządzeniu
+    2. Zmianie konteksu, jeżeli jest inny niż aktualny (RESET_TLB + zmiana rozmiarów płótna),
+       co wymaga czekania na wykonanie wszystkich polecen znajdujących się w kolejce urządzenia
+    3. Zapamiętaniu ostatniej komendy w kontekscie (dla src_pos, dst_pos i fill_color) lub
+       dodaniu do kolejki 3 poleceń (dla do_fill i do_blit)
+    4. W przypadku braku miejsca w kolejce zawieszamy sie czekając na obudzenie z przerwania,
+       które sygnalizuje zakonczenie jakiegoś polecenia
